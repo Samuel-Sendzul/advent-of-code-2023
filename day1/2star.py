@@ -14,7 +14,7 @@ def calculate_calibration_value(lines: list[str]):
     return total
 
 if __name__ == "__main__":
-    lines = read_file_to_list("./1/1 star.txt")
+    lines = read_file_to_list("./day1/1 star.txt")
 
     # Calculating the total calibration value
     total_value = calculate_calibration_value(lines)
