@@ -1,61 +1,42 @@
 from util import read_file_to_list_of_lists
+from typing import List
+from collections import defaultdict
 
+file_path = 'day3/data.txt'  # Replace with your actual file path
+G = read_file_to_list_of_lists(file_path)
 
-def find_full_numbers_next_to_symbols(grid):
-    """
-    Find all full numbers that are directly next to a symbol in the grid.
-    A symbol is defined as any non-digit and non-period character.
+R = len(G)
+C = len(G[0])
 
-    Args:
-    grid (List[List[str]]): The grid as a list of lists.
+p1 = 0
+nums = defaultdict(list)
+for r in range(len(G)):
+    gears = set()  # positions of '*' characters next to the current number
+    n = 0
+    has_part = False
+    for c in range(len(G[r])+1):
+        if c < C and G[r][c].isdigit():
+            n = n*10+int(G[r][c])
+            for rr in [-1, 0, 1]:
+                for cc in [-1, 0, 1]:
+                    if 0 <= r+rr < R and 0 <= c+cc < C:
+                        ch = G[r+rr][c+cc]
+                        if not ch.isdigit() and ch != '.':
+                            has_part = True
+                        if ch == '*':
+                            gears.add((r+rr, c+cc))
+        elif n > 0:
+            for gear in gears:
+                nums[gear].append(n)
+            if has_part:
+                p1 += n
+            n = 0
+            has_part = False
+            gears = set()
 
-    Returns:
-    Set[str]: A set of all full numbers next to symbols.
-    """
-    # Define the directions to check for symbols
-    directions = [
-        (-1, -1), (-1, 0), (-1, 1),
-        (0, -1),           (0, 1),
-        (1, -1),  (1, 0),  (1, 1)
-    ]
-
-    # Set to store the numbers found next to symbols
-    numbers_next_to_symbols = set()
-
-    # Function to get the full number from a starting position
-    def get_full_number(row, col):
-        number = ''
-        # Check left
-        c = col
-        while c >= 0 and grid[row][c].isdigit():
-            number = grid[row][c] + number
-            c -= 1
-
-        # Check right
-        c = col + 1
-        while c < len(grid[row]) and grid[row][c].isdigit():
-            number += grid[row][c]
-            c += 1
-
-        return number
-
-    # Iterate through the grid
-    for row in range(len(grid)):
-        for col in range(len(grid[row])):
-            # Check if the current element is a symbol
-            if not grid[row][col].isdigit() and grid[row][col] != '.':
-                # Check all directions for numbers
-                for dr, dc in directions:
-                    nr, nc = row + dr, col + dc
-                    if 0 <= nr < len(grid) and 0 <= nc < len(grid[nr]) and grid[nr][nc].isdigit():
-                        full_number = get_full_number(nr, nc)
-                        numbers_next_to_symbols.add(full_number)
-
-    return numbers_next_to_symbols
-
-
-if __name__ == "__main__":
-    file_path = 'day3/data.txt'  # Replace with your actual file path
-    grid_from_file = read_file_to_list_of_lists(file_path)
-    part_numbers = find_full_numbers_next_to_symbols(grid_from_file)
-    print(sum([int(num) for num in part_numbers]))
+print(p1)
+p2 = 0
+for k, v in nums.items():
+    if len(v) == 2:
+        p2 += v[0]*v[1]
+print(p2)
